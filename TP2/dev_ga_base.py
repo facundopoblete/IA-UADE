@@ -93,17 +93,6 @@ class Phenotype:
         
         self.fitness_function()
         
-        # for i in range(0, 25):
-        #     prob_random = random.randint(0, 10)
-            
-        #     if (prob_random > 5):
-        #         randomValue = random.randint(1,5)
-                
-        #         while format(randomValue, '03b') == self.chromosome[i]:
-        #             randomValue = random.randint(1,5)
-                
-        #         self.chromosome[i] = format(randomValue, '03b')
-
     def fitness_function(self):
         ''' calcula el valor de fitness del cromosoma segun el problema en particular '''
 
@@ -127,8 +116,8 @@ class Phenotype:
             for j in range(0,5):
                 if matrix[i].count(matrix[i][j]) > 1:
                     self.score += punish_score
-                    
-# 2. El Matematico vive en la casa roja.
+                        
+        # 2. El Matematico vive en la casa roja.
         try:
             i = matrix[PROFESSION_INDEX].index('Mathematician')
             if matrix[COLOR_INDEX][i] == 'red':
@@ -140,7 +129,8 @@ class Phenotype:
         except:
             self.fails.append(2)
             self.score += punish_score
-# 3. El hacker programa en Python
+        
+        # 3. El hacker programa en Python
         try:
             i = matrix[PROFESSION_INDEX].index('Hacker')
             if matrix[LANGUAJE_INDEX][i] == 'Python':
@@ -152,7 +142,8 @@ class Phenotype:
         except:
             self.fails.append(3)
             self.score += punish_score
-# 4. El Brackets es utilizado en la casa verde.
+        
+        # 4. El Brackets es utilizado en la casa verde.
         try:
             i = matrix[EDITOR_INDEX].index('Brackets')
             if matrix[COLOR_INDEX][i] == 'green':
@@ -164,7 +155,8 @@ class Phenotype:
         except:
             self.fails.append(4)
             self.score += punish_score
-# 5. El analista usa Atom.
+        
+        # 5. El analista usa Atom.
         try:
             i = matrix[PROFESSION_INDEX].index('Analyst')
             if matrix[EDITOR_INDEX][i] == 'Atom':
@@ -176,7 +168,8 @@ class Phenotype:
         except:
             self.score += punish_score
             self.fails.append(5)
-# 6. La casa verde esta a la derecha de la casa blanca.
+        
+        # 6. La casa verde esta a la derecha de la casa blanca.
         try:
             i = matrix[COLOR_INDEX].index('green')
             if i != 0 and matrix[COLOR_INDEX][i-1] == 'white':
@@ -188,7 +181,8 @@ class Phenotype:
         except:
             self.fails.append(6)
             self.score += punish_score
-# 7. La persona que usa Redis programa en Java
+        
+        # 7. La persona que usa Redis programa en Java
         try:
             i = matrix[DATABASE_INDEX].index('Redis')
             if matrix[LANGUAJE_INDEX][i] == 'Java':
@@ -200,7 +194,8 @@ class Phenotype:
         except:
             self.score += punish_score
             self.fails.append(7)
-# 8. Cassandra es utilizado en la casa amarilla
+        
+        # 8. Cassandra es utilizado en la casa amarilla
         try:
             i = matrix[DATABASE_INDEX].index('Cassandra')
             if matrix[COLOR_INDEX][i] == 'yellow':
@@ -212,7 +207,8 @@ class Phenotype:
         except:
             self.score += punish_score
             self.fails.append(8)
-# 9. Notepad++ es usado en la casa del medio.
+        
+        # 9. Notepad++ es usado en la casa del medio.
         try:
             i = matrix[EDITOR_INDEX].index('Notepad++')
             if i == 2:
@@ -224,7 +220,8 @@ class Phenotype:
         except:
             self.score += punish_score
             self.fails.append(9)
-# 10. El Desarrollador vive en la primer casa.
+        
+        # 10. El Desarrollador vive en la primer casa.
         try:
             i = matrix[PROFESSION_INDEX].index('Developer')
             if i == 0:
@@ -236,7 +233,8 @@ class Phenotype:
         except:
             self.score += punish_score
             self.fails.append(10)
-# 11. La persona que usa HBase vive al lado de la que programa en JavaScript.
+
+        # 11. La persona que usa HBase vive al lado de la que programa en JavaScript.
         try:
             i = matrix[DATABASE_INDEX].index('HBase')
             if (i != 4 and matrix[LANGUAJE_INDEX][i+1] == 'JavaScript') or (i != 0 and matrix[LANGUAJE_INDEX][i-1] == 'JavaScript'):
@@ -248,7 +246,8 @@ class Phenotype:
         except:
             self.score += punish_score
             self.fails.append(11)
-# 12. La persona que usa Cassandra es vecina de la que programa en C#.
+
+        # 12. La persona que usa Cassandra es vecina de la que programa en C#.
         try:
             i = matrix[DATABASE_INDEX].index('Cassandra')
             if (i != 4 and matrix[LANGUAJE_INDEX][i+1] == 'C#') or (i != 0 and matrix[LANGUAJE_INDEX][i-1] == 'C#'):
@@ -260,7 +259,8 @@ class Phenotype:
         except:
             self.score += punish_score
             self.fails.append(12)
-# 13. La persona que usa Neo4J usa Sublime Text.
+        
+        # 13. La persona que usa Neo4J usa Sublime Text.
         try:
             i = matrix[DATABASE_INDEX].index('Neo4j')
             if matrix[EDITOR_INDEX][i] == 'Sublime Text':
@@ -272,7 +272,8 @@ class Phenotype:
         except:
             self.fails.append(13)
             self.score += punish_score
-# 14. El Ingeniero usa MongoDB.
+        
+        # 14. El Ingeniero usa MongoDB.
         try:
             i = matrix[PROFESSION_INDEX].index('Engineer')
             if matrix[DATABASE_INDEX][i] == 'MongoDB':
@@ -284,7 +285,8 @@ class Phenotype:
         except:
             self.score += punish_score
             self.fails.append(14)
-# 15. EL desarrollador vive en la casa azul.
+        
+        # 15. EL desarrollador vive en la casa azul.
         try:
             i = matrix[PROFESSION_INDEX].index('Developer')
             if matrix[COLOR_INDEX][i] == 'blue':
@@ -312,15 +314,24 @@ class Riddle:
         self.generate(n_population)
         print(f"Poblacion creada con {len(self.population)} individuos")
 
-        ''' descomentame '''
-        print(self.population[0].chromosome)
-        print(self.population[0].decode())
-
         print("Inicio del proceso iterativo")
         fit, indi = self.iterar()
 
         print(f"Fin del proceso, mejor resultado \n - Fitness: {fit} \n - Individuo {indi.chromosome} \n - Individuo {indi.decode()}")
         
+    def printStep(self, counter):
+        print("")
+        print("###")
+        print("Paso ", counter)
+        print("Mejor puntaje ", self.population[len(self.population)-1].score)
+        
+        # DEBUG
+        # print("len: {}", len(self.population))               
+        # print("score: {}", self.population[len(self.population)-1].score)
+        # print("approves: {}", self.population[len(self.population)-1].approves)
+        # print("fails: {}", self.population[len(self.population)-1].fails)
+        # for i in range(0,5):
+        #     print('BEST: ', self.population[len(self.population)-1].decode()[i])
 
     def iterar(self):
 
@@ -329,24 +340,12 @@ class Riddle:
 
         while not(break_condition):
             
-            if counter % 100 == 0:
-                print("--------------------------------")
-                print(counter)
-                #print(self.population[0].decode())
-            
             # seleccion
             self.population.sort(key=lambda x: x.score)
             
-            print("len: {}", len(self.population))               
-            print("score: {}", self.population[len(self.population)-1].score)
-            print("approves: {}", self.population[len(self.population)-1].approves)
-            print("fails: {}", self.population[len(self.population)-1].fails)
-            for i in range(0,5):
-                print('BEST: ', self.population[len(self.population)-1].decode()[i])
+            self.printStep(counter)
             
             if(self.population[len(self.population)-1].score >= 14):
-                print("----FIN---")
-                print(self.population[len(self.population)-1].decode())
                 break_condition = True
                 return self.population[len(self.population)-1].approves, self.population[len(self.population)-1]
         
@@ -371,17 +370,13 @@ class Riddle:
                 next_population.append(child1)
                 next_population.append(child2)
 
-            # mutate
-            next_population_mutated = self.mutate(next_population.copy())
-            # self.population = next_population_mutated
             self.population = next_population
             
             # condicion de corte
             if counter > 20000:
-                print("condicion de corte")
+                print("### Fin por condicion de corte ###")
                 break_condition = True
 
-            print(chr(27) + "[2J")
             counter += 1
 
         return self.population[0].approves, self.population[0]
@@ -424,15 +419,6 @@ class Riddle:
         for i in range(split_position, 25):
             child1.chromosome.append(progenitor_2.chromosome[i])
             child2.chromosome.append(progenitor_1.chromosome[i])
-        
-        # for i in range(0, 25):
-        #     prob_random = random.randint(0, 1)
-        #     if (prob_random == 0):
-        #         child1.chromosome.append(progenitor_1.chromosome[i])
-        #         child2.chromosome.append(progenitor_2.chromosome[i])
-        #     elif (prob_random == 1):
-        #         child1.chromosome.append(progenitor_2.chromosome[i])
-        #         child2.chromosome.append(progenitor_1.chromosome[i])
         
         child1.fitness_function()
         child2.fitness_function()
