@@ -1,0 +1,5 @@
+['blue', 'Developer', 'JavaScript', 'Neo4j', 'Sublime Text']
+['red', 'Mathematician', 'C#', 'HBase', 'Vim']
+['yellow', 'Hacker', 'Python', 'Cassandra', 'Notepad++']
+['white', 'Analyst', 'Java', 'Redis', 'Atom']
+['green', 'Engineer', 'C++', 'MongoDB', 'Brackets']
