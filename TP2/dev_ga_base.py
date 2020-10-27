@@ -49,8 +49,8 @@ EDITOR_INDEX = 4
 #Parameters
 POPULATION_LEN = 20000      #Limite de población
 PARENT_COUNT = 2800         #Número de individuos (mejores) usados para generar la próxima generación
-PARENT_TO_NEXT_GEN = 1000    #Número de individuos (mejores) que se transfieren a la siguiente generación
-MAX_GENE_MUTATION = 25      #Cantidad máxima de mutaciones en un individuo
+PARENT_TO_NEXT_GEN = 1400    #Número de individuos (mejores) que se transfieren a la siguiente generación
+MAX_GENE_MUTATION = 20      #Cantidad máxima de mutaciones en un individuo
 MUTATION_RATE = 0.38         #Probabilidad de que un gen mute
 
 class Phenotype:
@@ -88,7 +88,7 @@ class Phenotype:
                  database[self.chromosome[i*5+3]],
                  editor[self.chromosome[i*5+4]]] for i in range(5)]
 
-    def mutate(self, local_random):
+    def mutate(self):
         ''' muta un fenotipo haciendo swap'''
         ''' se puede hacer esto porque cambié la función de inicialización de la población para que no contenga repetidos'''
 
@@ -99,12 +99,12 @@ class Phenotype:
         
         while chromosome_change > 0:
             
-            col = local_random.randint(0, 4) #Tipo de característica
-            row1 = local_random.randint(0, 4) #Valor de la caracteristica 1
-            row2 = local_random.randint(0, 4) #Valor de la caracteristica 2
+            col = random.randint(0, 4) #Tipo de característica
+            row1 = random.randint(0, 4) #Valor de la caracteristica 1
+            row2 = random.randint(0, 4) #Valor de la caracteristica 2
 
             while row1 == row2:
-                row2 = local_random.randint(0, 4)
+                row2 = random.randint(0, 4)
         
             auxSwapValue = self.chromosome[row1*5+col]
             self.chromosome[row1*5+col] = self.chromosome[row2*5+col]
@@ -322,9 +322,9 @@ class Riddle:
         print("")
         print("###")
         print("Paso ", counter)
-        # half = int(len(self.population)/2)
-        # average = sum(map(lambda x: x.score, self.population[half:]))/half
-        # print("Promedio ", average)
+        half = int(len(self.population)/2)
+        average = sum(map(lambda x: x.score, self.population[half:]))/half
+        print("Promedio ", average)
         print("Mejor puntaje ", self.population[len(self.population)-1].score)
         print("Mejor individio ", self.population[len(self.population)-1].decode())
         print("Mejor individio Fails ", self.population[len(self.population)-1].fails)
@@ -393,22 +393,15 @@ class Riddle:
     def crossover_parallel_batch(self, parents, batch_size):
         next_population_batch = []
 
-        local_random = random.Random()
-        local_random.seed(time.time_ns())
-
         while len(next_population_batch) < batch_size:
             if (len(parents) + len(next_population_batch)) > batch_size:
                 for progenitor in parents:
-                    child1, child2 = self.crossOver(progenitor, local_random)
-                    next_population_batch.append(child1)
-                    next_population_batch.append(child2)
+                    next_population_batch.append(self.crossOver(progenitor))
                     if len(next_population_batch) >= batch_size:
                         break
             else:
                 for progenitor in parents:
-                    child1, child2 = self.crossOver(progenitor, local_random)
-                    next_population_batch.append(child1)
-                    next_population_batch.append(child2)
+                    next_population_batch.append(self.crossOver(progenitor))
         
         return next_population_batch
 
@@ -421,19 +414,14 @@ class Riddle:
             self.population.append(newbie)
     
     
-    def crossOver(self, progenitor, random):
-        child1 = Phenotype()
-        child1.chromosome = progenitor.chromosome.copy()
-        
-        child2 = Phenotype()
-        child2.chromosome = progenitor.chromosome.copy()
+    def crossOver(self, progenitor):
+        child = Phenotype()
+        child.chromosome = progenitor.chromosome.copy()
 
-        child1.mutate(random)
-        child2.mutate(random)
-        child1.fitness_function()
-        child2.fitness_function()
+        child.mutate()
+        child.fitness_function()
 
-        return [child1, child2]
+        return child
 
 
 
