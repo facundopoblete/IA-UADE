@@ -325,16 +325,9 @@ class Riddle:
             
             parents = self.population[0:PARENTS_LEN]
             random.shuffle(parents)
-            
-            child_lists = pool.starmap(self.cross_over, [([parents]) for i in range(mp.cpu_count())])
 
-            next_population = []
-            for childs in child_lists:
-                for child in childs:
-                    self.mutate(child)
-                    next_population.append(child)
-                    
-            # next_population = self.cross_over(parents)
+            next_population = self.cross_over(parents)
+            
             # nueva poblacion
             self.population = next_population
 
@@ -350,8 +343,7 @@ class Riddle:
     def cross_over(self, parents):
         next_population = []
         
-        while(len(next_population) < POPULATION_LEN/mp.cpu_count()):
-        # while(len(next_population) < POPULATION_LEN):
+        while(len(next_population) < POPULATION_LEN):
                 ran_parent1 = random.randint(0, len(parents)-1)
                 ran_parent2 = random.randint(0, len(parents)-1)
 
@@ -363,10 +355,10 @@ class Riddle:
                 
                 child1, child2 = self.crossOver(parent_1, parent_2)
                 
-                # self.mutate(child1)
-                # self.mutate(child2)
                 child2.fitness_function()
                 child1.fitness_function()
+                self.mutate(child1)
+                self.mutate(child2)
                 next_population.append(child1)
                 next_population.append(child2)
                 
@@ -420,8 +412,9 @@ class Riddle:
     '''
 
     def mutate(self, crossed):
-        # if (random.random() >= 0.60):
-        crossed.mutate()
+        if (random.random() >= 0.60):
+            crossed.mutate()
+            
         crossed.fitness_function()
 
     '''
@@ -437,21 +430,6 @@ class Riddle:
         child_1.fitness_function()
         child_2.fitness_function()
         
-        return child_1, child_2
-        # if (random.random() > 0.8):
-        #     return progenitor_1, progenitor_2
-        
-        for i in range(0, 5):
-            for j in range(0, 5):
-                if (random.random() > 0.5):
-                    child_1.chromosome.append(progenitor_1.chromosome[i*5+j])
-                    child_2.chromosome.append(progenitor_2.chromosome[i*5+j])
-                else:
-                    child_2.chromosome.append(progenitor_1.chromosome[i*5+j])
-                    child_1.chromosome.append(progenitor_2.chromosome[i*5+j])
-                
-        child_1.fitness_function()
-        child_2.fitness_function()
         return child_1, child_2
 
 random.seed(time.time_ns())
