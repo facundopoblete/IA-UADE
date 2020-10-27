@@ -31,6 +31,7 @@ editor = Brackets, Sublime Text, Atom, Notepad++, Vim
 
 import random
 import time
+import numpy as np
 from datetime import datetime
 
 colors =      {'001' : 'red',          '010' : 'blue',          '011' : 'green',    '100' : 'white',    '101' : 'yellow'}
@@ -47,74 +48,70 @@ EDITOR_INDEX = 4
 
 POPULATION_LEN = 20000
 
-PARENTS_LEN = 20
+PARENTS_LEN = 1500 #round(POPULATION_LEN * 0.003)
 MAX_ITERATIONS = 20000
 
 class Phenotype:
 
     def __init__(self):
-        # crear un individuo
-        self.chromosome = self.createRandomChromosome()
-        self.fitness_function()
+        self.chromosome = []
 
-    def createRandomChromosome(self):
-        chromosome = []
-        for i in range(0, 25):
-            randomValue = random.randint(1,5)
-            chromosome.append(format(randomValue, '03b'))
-    
-        return chromosome
-    
     def decode(self):
         ''' traduce 0's y 1's (conjunto de genes: 3) en valores segun un diccionario '''
-        return [[colors[self.chromosome[i*5+0]], 
+        return [[colors[self.chromosome[i*5+0]],
                  prefession[self.chromosome[i*5+1]],
                  languaje[self.chromosome[i*5+2]],
                  database[self.chromosome[i*5+3]],
                  editor[self.chromosome[i*5+4]]] for i in range(5)]
-                 
+
     def mutate(self):
         ''' muta un fenotipo, optimizado'''
         
-        chromosome_change = random.randint(1, 25)
+        random_counts = random.randint(0,10)
         
-        while chromosome_change != 0:
+        for i in range(0, random_counts):
+            random_1 = random.randint(0, 24)
+            random_2 = random.randint(0, 24)
             
-            random_i = random.randint(0, 24)
-        
-            randomValue = random.randint(1,5)
-                    
-            while format(randomValue, '03b') == self.chromosome[random_i]:
-                randomValue = random.randint(1,5)
+            while random_1 == random_2:
+                random_2 = random.randint(0, 24)
+                
+            chromosome_aux = self.chromosome[random_1]
+            self.chromosome[random_1] = self.chromosome[random_2]
+            self.chromosome[random_2] = chromosome_aux
             
-            self.chromosome[random_i] = format(randomValue, '03b')
-            
-            chromosome_change -= 1
+            self.fitness_function()
+        # count = random.randint(1, 5)
+        # random_index = random.sample(range(25), count)
         
-        self.fitness_function()
+        # for i in random_index:
+        #     randomValue = random.randint(1, 5)
+        #     self.chromosome[i] = format(randomValue, '03b')
         
+        # self.fitness_function()
+
     def fitness_function(self):
         ''' calcula el valor de fitness del cromosoma segun el problema en particular '''
 
         self.score = 0
         self.fails = []
-        
+
         ok_score = 1
         fail_score = -1
-        punish_score = -3 
-        
-        matrix = [[0 for x in range(5)] for x in range(5)] 
+        punish_score = -3
+
+        matrix = [[0 for x in range(5)] for x in range(5)]
         chromosome_decode = self.decode()
-        
+
         for i in range(0, 5):
             for j in range(0, 5):
                 matrix[i][j] = chromosome_decode[j][i]
 
         for i in range(0, 5):
-            for j in range(0,5):
+            for j in range(0, 5):
                 if matrix[i].count(matrix[i][j]) > 1:
                     self.score += punish_score
-                        
+
         # 2. El Matematico vive en la casa roja.
         try:
             i = matrix[PROFESSION_INDEX].index('Mathematician')
@@ -126,7 +123,7 @@ class Phenotype:
         except:
             self.fails.append(2)
             self.score += punish_score
-        
+
         # 3. El hacker programa en Python
         try:
             i = matrix[PROFESSION_INDEX].index('Hacker')
@@ -138,7 +135,7 @@ class Phenotype:
         except:
             self.fails.append(3)
             self.score += punish_score
-        
+
         # 4. El Brackets es utilizado en la casa verde.
         try:
             i = matrix[EDITOR_INDEX].index('Brackets')
@@ -150,7 +147,7 @@ class Phenotype:
         except:
             self.fails.append(4)
             self.score += punish_score
-        
+
         # 5. El analista usa Atom.
         try:
             i = matrix[PROFESSION_INDEX].index('Analyst')
@@ -162,7 +159,7 @@ class Phenotype:
         except:
             self.score += punish_score
             self.fails.append(5)
-        
+
         # 6. La casa verde esta a la derecha de la casa blanca.
         try:
             i = matrix[COLOR_INDEX].index('green')
@@ -174,7 +171,7 @@ class Phenotype:
         except:
             self.fails.append(6)
             self.score += punish_score
-        
+
         # 7. La persona que usa Redis programa en Java
         try:
             i = matrix[DATABASE_INDEX].index('Redis')
@@ -186,7 +183,7 @@ class Phenotype:
         except:
             self.score += punish_score
             self.fails.append(7)
-        
+
         # 8. Cassandra es utilizado en la casa amarilla
         try:
             i = matrix[DATABASE_INDEX].index('Cassandra')
@@ -198,7 +195,7 @@ class Phenotype:
         except:
             self.score += punish_score
             self.fails.append(8)
-        
+
         # 9. Notepad++ es usado en la casa del medio.
         try:
             i = matrix[EDITOR_INDEX].index('Notepad++')
@@ -210,7 +207,7 @@ class Phenotype:
         except:
             self.score += punish_score
             self.fails.append(9)
-        
+
         # 10. El Desarrollador vive en la primer casa.
         try:
             i = matrix[PROFESSION_INDEX].index('Developer')
@@ -246,7 +243,7 @@ class Phenotype:
         except:
             self.score += punish_score
             self.fails.append(12)
-        
+
         # 13. La persona que usa Neo4J usa Sublime Text.
         try:
             i = matrix[DATABASE_INDEX].index('Neo4j')
@@ -258,7 +255,7 @@ class Phenotype:
         except:
             self.fails.append(13)
             self.score += punish_score
-        
+
         # 14. El Ingeniero usa MongoDB.
         try:
             i = matrix[PROFESSION_INDEX].index('Engineer')
@@ -270,7 +267,7 @@ class Phenotype:
         except:
             self.score += punish_score
             self.fails.append(14)
-        
+
         # 15. EL desarrollador vive en la casa azul.
         try:
             i = matrix[PROFESSION_INDEX].index('Developer')
@@ -282,36 +279,37 @@ class Phenotype:
         except:
             self.score += punish_score
             self.fails.append(15)
-        
+
 class Riddle:
 
     def __init__(self):
         self.start_time = time.time()
         self.population = []
 
-
     '''
     proceso general
     '''
+
     def solve(self, n_population):
-        
         self.generate(n_population)
         print(f"Poblacion creada con {len(self.population)} individuos")
 
         print("Inicio del proceso iterativo")
         fit, indi = self.iterar()
 
-        print(f"Fin del proceso, mejor resultado \n - Fitness: {fit} \n - Individuo {indi.chromosome} \n - Individuo {indi.decode()}")
-        
+        print(
+            f"Fin del proceso, mejor resultado \n - Fitness: {fit} \n - Individuo {indi.chromosome} \n - Individuo {indi.decode()}")
+
     def printStep(self, counter):
         print("")
         print("###")
         print("Paso ", counter)
-        
+
         # DEBUG
+        print(id(self.population[0]))
         print("Puntaje: {}", self.population[0].score)
         print("Fallo: {}", self.population[0].fails)
-        for i in range(0,5):
+        for i in range(0, 5):
             print('Mejor: ', self.population[0].decode()[i])
 
     def iterar(self):
@@ -320,39 +318,42 @@ class Riddle:
         break_condition = False
 
         while not(break_condition):
-            
+
             # seleccion
             self.population.sort(key=lambda x: x.score, reverse=True)
-            
+
             self.printStep(counter)
-            
+
             if(self.population[0].score >= 14):
                 break_condition = True
-                return self.population[0].approves, self.population[0]
-        
+                return self.population[0].score, self.population[0]
+
             # crossover
             next_population = []
-            
-            parents = self.population[0:PARENTS_LEN:]
+
+            parents = self.population[0:PARENTS_LEN]
             random.shuffle(parents)
-            self.population.clear()
-            
             while(len(next_population) < POPULATION_LEN):
-                ran_parent1 = random.randint(0,len(parents)-1)
-                ran_parent2 = random.randint(0,len(parents)-1)
-                
+                ran_parent1 = random.randint(0, len(parents)-1)
+                ran_parent2 = random.randint(0, len(parents)-1)
+
                 while(ran_parent1 == ran_parent2):
-                    ran_parent2 = random.randint(0,len(parents)-1)
-                
+                    ran_parent2 = random.randint(0, len(parents)-1)
+
                 parent_1 = parents[ran_parent1]
                 parent_2 = parents[ran_parent2]
-                
+
                 child1, child2 = self.crossOver(parent_1, parent_2)
+                
                 next_population.append(child1)
                 next_population.append(child2)
 
+            for i in range(0, POPULATION_LEN):
+                self.mutate(next_population[i])
+                
+            # nueva poblacion
             self.population = next_population
-            
+
             # condicion de corte
             if counter > MAX_ITERATIONS:
                 print("### Fin por condicion de corte ###")
@@ -365,55 +366,102 @@ class Riddle:
     '''
     operacion: generar individuos y agregarlos a la poblacion
     '''
-    def generate(self, i):
-        for x in range(0,i):
-            newbie = Phenotype()
-            self.population.append(newbie)
 
+    def generate(self, i):
+        for _ in range(0, i):
+            newbie = Phenotype()
+            newbie.chromosome = self.createRandomChromosome()
+            newbie.fitness_function()
+            self.population.append(newbie)
+    
+    # def createRandomChromosome(self):
+    #     chromosome = []
+    #     for _ in range(0, 25):
+    #         randomValue = random.randint(1, 5)
+    #         chromosome.append(format(randomValue, '03b'))
+
+    #     return chromosome
+    
+    def createRandomChromosome(self):
+        h = 5
+        geneMatrix = [[] for y in range(h)]
+
+        chromosome = []
+        for i in range(0,5):
+            for j in range(0,5):
+                randomValue = random.randint(1,5)
+
+                while geneMatrix[i].count(randomValue) > 0:
+                    randomValue = random.randint(1,5)
+                
+                geneMatrix[i].append(format(randomValue, '03b'))
+
+        for i in range(0,5):
+            for j in range(0,5):
+                chromosome.append(geneMatrix[j][i])
+        
+        return chromosome
+    
     '''
     operacion: mutación. Cambiar la configuración fenotipica de un individuo
     '''
-    def mutate(self, crossed, prob=0.5):
-        for i in range(0, len(crossed)-1):
-            prob_random = random.random()
 
-            if (prob_random > prob):
-                crossed[i].mutate()
-                
-        return crossed
+    def mutate(self, crossed):
+        if (random.random() >= 0.42):
+            crossed.mutate()
+            crossed.fitness_function()
 
     '''
     operacion: cruazamiento. Intercambio de razos fenotipicos entre individuos
     '''
-    def crossOver(self, progenitor_1, progenitor_2):
-        child1 = Phenotype()
-        child1.chromosome = []
-        
-        child2 = Phenotype()
-        child2.chromosome = []
-        
-        split_position = random.randint(0, 25)
-        for i in range(0, split_position):
-            child1.chromosome.append(progenitor_1.chromosome[i])
-            child2.chromosome.append(progenitor_2.chromosome[i])
-            
-        for i in range(split_position, 25):
-            child1.chromosome.append(progenitor_2.chromosome[i])
-            child2.chromosome.append(progenitor_1.chromosome[i])
-        
-        child1.fitness_function()
-        child2.fitness_function()
-        child1.mutate()
-        child2.mutate()
-        return [child1, child2]
 
-random.seed(datetime.now())
+    def crossOver(self, progenitor_1, progenitor_2):
+        
+        if (random.random() >= 0.8):
+            return [progenitor_1, progenitor_2]
+        
+        A = progenitor_1.chromosome.copy()
+        B = progenitor_2.chromosome.copy()
+        
+        child_1 = Phenotype()
+        child_2 = Phenotype()
+        
+        P = np.random.rand(25)
+        
+        for i in range(len(P)):
+            if P[i] < 0.5:
+                temp = A[i]
+                A[i] = B[i]
+                B[i] = temp
+        
+        child_1.chromosome = A
+        child_2.chromosome = B
+        
+        # # Get length of chromosome
+        # chromosome_length = 25
+        
+        # # Pick crossover point, avoding ends of chromsome
+        # crossover_point = random.randint(1,chromosome_length-1)
+        
+        # # Create children. np.hstack joins two arrays
+        # child_1.chromosome = np.hstack((progenitor_1.chromosome[0:crossover_point],
+        #                     progenitor_2.chromosome[crossover_point:]))
+        
+        # child_2.chromosome = np.hstack((progenitor_2.chromosome[0:crossover_point],
+        #                     progenitor_1.chromosome[crossover_point:]))
+        
+        # Return children
+        child_1.fitness_function()
+        child_2.fitness_function()
+        return child_1, child_2
+
+random.seed(time.time_ns())
 start = time.time()
 
 rid = Riddle()
-rid.solve(n_population = POPULATION_LEN)
+rid.solve(n_population=POPULATION_LEN)
 
 end = time.time()
 hours, rem = divmod(end-start, 3600)
 minutes, seconds = divmod(rem, 60)
-print("Tiempo transcurrido {:0>2}:{:0>2}:{:05.2f}".format(int(hours),int(minutes),seconds))
+print("Tiempo transcurrido {:0>2}:{:0>2}:{:05.2f}".format(int(hours),int(minutes),seconds))
