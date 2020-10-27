@@ -51,9 +51,9 @@ POPULATION_LEN = 20000                  #Limite de población
 PARENT_COUNT = 2800                     #Número de individuos (mejores) usados para generar la próxima generación
 PARENT_TO_NEXT_GEN = 1400               #Número de individuos (mejores) que se transfieren a la siguiente generación
 MAX_GENE_MUTATION = 20                  #Cantidad máxima de mutaciones en un individuo
-MUTATION_RATE = 0.14                    #Probabilidad de que un gen mute
-INDIVIDUAL_CROSSOVER_RATE = 0.5         #Probabilidad de que un individuo tenga 2 parents
-GENE_CROSSOVER_RATE = 0.6               #Probabilidad de que se haga crossover para un gen
+MUTATION_RATE = 0.05                    #Probabilidad de que un gen mute
+INDIVIDUAL_CROSSOVER_RATE = 0.50        #Probabilidad de que un individuo tenga 2 parents
+GENE_CROSSOVER_RATE = 0.60              #Probabilidad de que se haga crossover para un gen
 
 class Phenotype:
 
@@ -287,7 +287,7 @@ class Riddle:
         indi = self.iterar()
 
         print(f"Fin del proceso, mejor resultado \n - Individuo {indi.chromosome} \n - Individuo {indi.decode()}")
-        print("Parámetros. PARENT_COUNT:", PARENT_COUNT , "POPULATION_LEN ", POPULATION_LEN, "MAX_GENE_MUTATION ", MAX_GENE_MUTATION, "MUTATION_RATE ", MUTATION_RATE)
+        print("Parámetros. PARENT_COUNT:", PARENT_COUNT , "POPULATION_LEN ", POPULATION_LEN, "MAX_GENE_MUTATION ", MAX_GENE_MUTATION, "MUTATION_RATE ", MUTATION_RATE, )
         
     def printStep(self, counter):
         print("")
@@ -295,12 +295,9 @@ class Riddle:
         print("Paso ", counter)
         half = int(len(self.population)/2)
         average = sum(map(lambda x: x.score, self.population[half:]))/half
-        print("Promedio ", average)
-        print("Mejor puntaje ", self.population[len(self.population)-1].score)
-        print("Mejor individuo ", self.population[len(self.population)-1].decode())
-        print("--- ")
-        print("Peor puntaje para padre", self.population[len(self.population) - PARENT_COUNT].score)
-        print("Peor padre ", self.population[len(self.population) - PARENT_COUNT].decode())
+        print("Promedio: ", average)
+        print("Mejor puntaje: ", self.population[len(self.population)-1].score)
+        print("Peor puntaje para padre: ", self.population[len(self.population) - PARENT_COUNT].score)
 
     def iterar(self):
 
