@@ -47,9 +47,9 @@ DATABASE_INDEX = 3
 EDITOR_INDEX = 4
 
 #Parameters
-POPULATION_LEN = 20000                  #Limite de población
-PARENT_COUNT = 2800                     #Número de individuos (mejores) usados para generar la próxima generación
-PARENT_TO_NEXT_GEN = 1400               #Número de individuos (mejores) que se transfieren a la siguiente generación
+POPULATION_LEN = 25000                  #Limite de población
+PARENT_COUNT = 2500                     #Número de individuos (mejores) usados para generar la próxima generación
+PARENT_TO_NEXT_GEN = 1000               #Número de individuos (mejores) que se transfieren a la siguiente generación
 MAX_GENE_MUTATION = 20                  #Cantidad máxima de mutaciones en un individuo
 MUTATION_RATE = 0.05                    #Probabilidad de que un gen mute
 INDIVIDUAL_CROSSOVER_RATE = 0.50        #Probabilidad de que un individuo tenga 2 parents
