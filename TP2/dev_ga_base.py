@@ -323,15 +323,12 @@ class Riddle:
         print("")
         print("###")
         print("Paso ", counter)
-        print("Mejor puntaje ", self.population[len(self.population)-1].score)
         
         # DEBUG
-        # print("len: {}", len(self.population))               
-        # print("score: {}", self.population[len(self.population)-1].score)
-        # print("approves: {}", self.population[len(self.population)-1].approves)
-        # print("fails: {}", self.population[len(self.population)-1].fails)
-        # for i in range(0,5):
-        #     print('BEST: ', self.population[len(self.population)-1].decode()[i])
+        print("Puntaje: {}", self.population[0].score)
+        print("Fallo: {}", self.population[0].fails)
+        for i in range(0,5):
+            print('Mejor: ', self.population[0].decode()[i])
 
     def iterar(self):
 
@@ -345,9 +342,9 @@ class Riddle:
             
             self.printStep(counter)
             
-            if(self.population[len(self.population)-1].score >= 14):
+            if(self.population[0].score >= 14):
                 break_condition = True
-                return self.population[len(self.population)-1].approves, self.population[len(self.population)-1]
+                return self.population[0].approves, self.population[0]
         
             # crossover
             next_population = []
