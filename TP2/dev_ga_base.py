@@ -32,6 +32,7 @@ editor = Brackets, Sublime Text, Atom, Notepad++, Vim
 import random
 import time
 from datetime import datetime
+import multiprocessing as mp
 
 colors =      ['red', 'blue', 'green', 'white', 'yellow']
 prefession =  ['Mathematician', 'Hacker', 'Engineer', 'Analyst', 'Developer']
@@ -45,10 +46,11 @@ LANGUAJE_INDEX = 2
 DATABASE_INDEX = 3
 EDITOR_INDEX = 4
 
-PARENT_COUNT = 1000
-POPULATION_LEN = 25000
-MAX_GENE_MUTATION = 25
-MUTATION_RATE = 0.4
+#Parameters
+PARENT_COUNT = 2800
+POPULATION_LEN = 20000
+MAX_GENE_MUTATION = 20
+MUTATION_RATE = 0.38
 
 class Phenotype:
 
@@ -302,7 +304,6 @@ class Riddle:
         self.start_time = time.time()
         self.population = []
 
-
     '''
     proceso general
     '''
@@ -315,11 +316,15 @@ class Riddle:
         fit, indi = self.iterar()
 
         print(f"Fin del proceso, mejor resultado \n - Fitness: {fit} \n - Individuo {indi.chromosome} \n - Individuo {indi.decode()}")
+        print("Parámetros. PARENT_COUNT:", PARENT_COUNT , "POPULATION_LEN ", POPULATION_LEN, "MAX_GENE_MUTATION ", MAX_GENE_MUTATION, "MUTATION_RATE ", MUTATION_RATE)
         
     def printStep(self, counter):
         print("")
         print("###")
         print("Paso ", counter)
+        half = int(len(self.population)/2)
+        average = sum(map(lambda x: x.score, self.population[half:]))/half
+        print("Promedio ", average)
         print("Mejor puntaje ", self.population[len(self.population)-1].score)
         print("Mejor individio ", self.population[len(self.population)-1].decode())
         print("Mejor individio Fails ", self.population[len(self.population)-1].fails)
@@ -346,6 +351,8 @@ class Riddle:
         counter = 0
         break_condition = False
 
+        pool = mp.Pool(mp.cpu_count())
+
         while not(break_condition):
             
             # seleccion
@@ -361,11 +368,11 @@ class Riddle:
             parents = self.population[len(self.population) - PARENT_COUNT:]
             next_population = self.population[len(self.population) - int(PARENT_COUNT/2):]  
 
-            while len(next_population) < POPULATION_LEN:
-                for progenitor in parents:
-                    child1, child2 = self.crossOver(progenitor)
-                    next_population.append(child1)
-                    next_population.append(child2)
+            child_lists = pool.starmap(self.crossover_parallel, [([parents]) for i in range(int(POPULATION_LEN/(PARENT_COUNT*2)))])
+
+            for childs in child_lists:
+                for child in childs:
+                    next_population.append(child)
 
             self.population.clear()
             self.population = next_population
@@ -376,8 +383,19 @@ class Riddle:
                 break_condition = True
 
             counter += 1
-
+        
+        pool.close()
         return self.population[0].approves, self.population[0]
+
+    def crossover_parallel(self, parents):
+        next_population = []
+
+        for progenitor in parents:
+            child1, child2 = self.crossOver(progenitor)
+            next_population.append(child1)
+            next_population.append(child2)
+        
+        return next_population
 
     '''
     operacion: generar individuos y agregarlos a la poblacion
