@@ -286,8 +286,16 @@ class Riddle:
         print("Inicio del proceso iterativo")
         indi = self.iterar()
 
-        print(f"Fin del proceso, mejor resultado \n - Individuo {indi.chromosome} \n - Individuo {indi.decode()}")
-        print("Parámetros. PARENT_COUNT:", PARENT_COUNT , "POPULATION_LEN ", POPULATION_LEN, "MAX_GENE_MUTATION ", MAX_GENE_MUTATION, "MUTATION_RATE ", MUTATION_RATE, )
+        print("\n *** \nFin del proceso, mejor resultado \n - Individuo", indi.chromosome, "\n")
+        print("Parámetros \n-->",
+                "POPULATION_LEN:", POPULATION_LEN,
+                "PARENT_COUNT:", PARENT_COUNT ,
+                "PARENT_TO_NEXT_GEN:", PARENT_TO_NEXT_GEN,
+                "MAX_GENE_MUTATION:", MAX_GENE_MUTATION,
+                "MUTATION_RATE:", MUTATION_RATE,
+                "INDIVIDUAL_CROSSOVER_RATE:",INDIVIDUAL_CROSSOVER_RATE,
+                "GENE_CROSSOVER_RATE:", GENE_CROSSOVER_RATE)
+        print("\n\n Solución\n", indi.decode())
         
     def printStep(self, counter):
         print("")
