@@ -362,7 +362,8 @@ class Riddle:
                         break
             else:
                 for progenitor in parents:
-                    next_population_batch.append(self.crossOver(progenitor))
+                    otherProgenitor = parents[random.randint(0, parent_count - 1)]
+                    next_population_batch.append(self.crossOver(progenitor, otherProgenitor))
         
         return next_population_batch
 
