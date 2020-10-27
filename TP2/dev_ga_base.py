@@ -97,16 +97,14 @@ class Phenotype:
         ''' calcula el valor de fitness del cromosoma segun el problema en particular '''
 
         self.score = 0
-        self.approves = 0
-
+        self.fails = []
+        
         ok_score = 1
         fail_score = -1
         punish_score = -3 
         
         matrix = [[0 for x in range(5)] for x in range(5)] 
         chromosome_decode = self.decode()
-        
-        self.fails = []
         
         for i in range(0, 5):
             for j in range(0, 5):
@@ -122,7 +120,6 @@ class Phenotype:
             i = matrix[PROFESSION_INDEX].index('Mathematician')
             if matrix[COLOR_INDEX][i] == 'red':
                 self.score += ok_score
-                self.approves += 1
             else:
                 self.fails.append(2)
                 self.score += fail_score
@@ -135,7 +132,6 @@ class Phenotype:
             i = matrix[PROFESSION_INDEX].index('Hacker')
             if matrix[LANGUAJE_INDEX][i] == 'Python':
                 self.score += ok_score
-                self.approves += 1
             else:
                 self.fails.append(3)
                 self.score += fail_score
@@ -148,7 +144,6 @@ class Phenotype:
             i = matrix[EDITOR_INDEX].index('Brackets')
             if matrix[COLOR_INDEX][i] == 'green':
                 self.score += ok_score
-                self.approves += 1
             else:
                 self.fails.append(4)
                 self.score += fail_score
@@ -161,7 +156,6 @@ class Phenotype:
             i = matrix[PROFESSION_INDEX].index('Analyst')
             if matrix[EDITOR_INDEX][i] == 'Atom':
                 self.score += ok_score
-                self.approves += 1
             else:
                 self.score += fail_score
                 self.fails.append(5)
@@ -174,7 +168,6 @@ class Phenotype:
             i = matrix[COLOR_INDEX].index('green')
             if i != 0 and matrix[COLOR_INDEX][i-1] == 'white':
                 self.score += ok_score
-                self.approves += 1
             else:
                 self.fails.append(6)
                 self.score += fail_score
@@ -187,7 +180,6 @@ class Phenotype:
             i = matrix[DATABASE_INDEX].index('Redis')
             if matrix[LANGUAJE_INDEX][i] == 'Java':
                 self.score += ok_score
-                self.approves += 1
             else:
                 self.score += fail_score
                 self.fails.append(7)
@@ -200,7 +192,6 @@ class Phenotype:
             i = matrix[DATABASE_INDEX].index('Cassandra')
             if matrix[COLOR_INDEX][i] == 'yellow':
                 self.score += ok_score
-                self.approves += 1
             else:
                 self.score += fail_score
                 self.fails.append(8)
@@ -213,7 +204,6 @@ class Phenotype:
             i = matrix[EDITOR_INDEX].index('Notepad++')
             if i == 2:
                 self.score += ok_score
-                self.approves += 1
             else:
                 self.score += fail_score
                 self.fails.append(9)
@@ -226,7 +216,6 @@ class Phenotype:
             i = matrix[PROFESSION_INDEX].index('Developer')
             if i == 0:
                 self.score += ok_score
-                self.approves += 1
             else:
                 self.score += fail_score
                 self.fails.append(10)
@@ -239,7 +228,6 @@ class Phenotype:
             i = matrix[DATABASE_INDEX].index('HBase')
             if (i != 4 and matrix[LANGUAJE_INDEX][i+1] == 'JavaScript') or (i != 0 and matrix[LANGUAJE_INDEX][i-1] == 'JavaScript'):
                 self.score += ok_score
-                self.approves += 1
             else:
                 self.score += fail_score
                 self.fails.append(11)
@@ -251,7 +239,6 @@ class Phenotype:
         try:
             i = matrix[DATABASE_INDEX].index('Cassandra')
             if (i != 4 and matrix[LANGUAJE_INDEX][i+1] == 'C#') or (i != 0 and matrix[LANGUAJE_INDEX][i-1] == 'C#'):
-                self.approves += 1
                 self.score += ok_score
             else:
                 self.score += fail_score
@@ -265,7 +252,6 @@ class Phenotype:
             i = matrix[DATABASE_INDEX].index('Neo4j')
             if matrix[EDITOR_INDEX][i] == 'Sublime Text':
                 self.score += ok_score
-                self.approves += 1
             else:
                 self.score += fail_score
                 self.fails.append(13)
@@ -278,7 +264,6 @@ class Phenotype:
             i = matrix[PROFESSION_INDEX].index('Engineer')
             if matrix[DATABASE_INDEX][i] == 'MongoDB':
                 self.score += ok_score
-                self.approves += 1
             else:
                 self.score += fail_score
                 self.fails.append(14)
@@ -291,7 +276,6 @@ class Phenotype:
             i = matrix[PROFESSION_INDEX].index('Developer')
             if matrix[COLOR_INDEX][i] == 'blue':
                 self.score += ok_score
-                self.approves += 1
             else:
                 self.score += fail_score
                 self.fails.append(15)
@@ -338,7 +322,7 @@ class Riddle:
         while not(break_condition):
             
             # seleccion
-            self.population.sort(key=lambda x: x.score)
+            self.population.sort(key=lambda x: x.score, reverse=True)
             
             self.printStep(counter)
             
