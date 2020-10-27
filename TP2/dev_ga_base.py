@@ -353,8 +353,8 @@ class Riddle:
 
         pool = mp.Pool(mp.cpu_count())
 
-        batch_count = mp.cpu_count()
-        batch_size = int(POPULATION_LEN/batch_count)
+        batch_count = int(mp.cpu_count()/2)
+        batch_size = int((POPULATION_LEN - PARENT_TO_NEXT_GEN)/batch_count)
 
         while not(break_condition):
             
@@ -371,6 +371,7 @@ class Riddle:
             parents = self.population[len(self.population) - PARENT_COUNT:]
             next_population = self.population[len(self.population) - PARENT_TO_NEXT_GEN:]
             
+
             child_lists = pool.starmap(self.crossover_parallel_batch, [(parents, batch_size) for i in range(batch_count)])
 
             for childs in child_lists:
@@ -379,6 +380,7 @@ class Riddle:
 
             self.population.clear()
             self.population = next_population
+            
             
             # condicion de corte
             if counter > 20000:
