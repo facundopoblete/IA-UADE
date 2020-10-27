@@ -48,6 +48,7 @@ EDITOR_INDEX = 4
 POPULATION_LEN = 20000
 
 PARENTS_LEN = round(POPULATION_LEN * 0.1 / 100)
+MAX_ITERATIONS = 20000
 
 class Phenotype:
 
@@ -354,7 +355,7 @@ class Riddle:
             self.population = next_population
             
             # condicion de corte
-            if counter > 20000:
+            if counter > MAX_ITERATIONS:
                 print("### Fin por condicion de corte ###")
                 break_condition = True
 
