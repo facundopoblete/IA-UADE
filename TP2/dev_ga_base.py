@@ -47,12 +47,13 @@ DATABASE_INDEX = 3
 EDITOR_INDEX = 4
 
 #Parameters
-POPULATION_LEN = 20000      #Limite de población
-PARENT_COUNT = 2800         #Número de individuos (mejores) usados para generar la próxima generación
-PARENT_TO_NEXT_GEN = 1400    #Número de individuos (mejores) que se transfieren a la siguiente generación
-MAX_GENE_MUTATION = 20      #Cantidad máxima de mutaciones en un individuo
-MUTATION_RATE = 0.38         #Probabilidad de que un gen mute
-CROSSOVER_RATE = 0.2         #Probabilidad de que un gen tenga 2 parents
+POPULATION_LEN = 20000                  #Limite de población
+PARENT_COUNT = 2800                     #Número de individuos (mejores) usados para generar la próxima generación
+PARENT_TO_NEXT_GEN = 1400               #Número de individuos (mejores) que se transfieren a la siguiente generación
+MAX_GENE_MUTATION = 20                  #Cantidad máxima de mutaciones en un individuo
+MUTATION_RATE = 0.14                    #Probabilidad de que un gen mute
+INDIVIDUAL_CROSSOVER_RATE = 0.5         #Probabilidad de que un individuo tenga 2 parents
+GENE_CROSSOVER_RATE = 0.6               #Probabilidad de que se haga crossover para un gen
 
 class Phenotype:
 
@@ -378,7 +379,7 @@ class Riddle:
         child = Phenotype()
         child.chromosome = progenitor1.chromosome.copy()
 
-        if random.random() < CROSSOVER_RATE:
+        if random.random() < INDIVIDUAL_CROSSOVER_RATE:
             child.chromosome = self._doCrossOver(child.chromosome, progenitor2.chromosome)
 
         child.mutate()
@@ -390,13 +391,14 @@ class Riddle:
         geneToCross = random.randint(0, 4)
 
         for characteristicToMutate in range(0, 5):
-            valueToAdd = chromosome2[geneToCross+characteristicToMutate]
-            valueToReplace = chromosome1[geneToCross+characteristicToMutate]
-            for i in range(0,5):
-                if chromosome1[i*5+characteristicToMutate] == valueToAdd:
-                    chromosome1[i*5+characteristicToMutate] = valueToReplace
-                    break
-            chromosome1[geneToCross+characteristicToMutate] = valueToAdd
+            if random.random() < GENE_CROSSOVER_RATE:
+                valueToAdd = chromosome2[geneToCross+characteristicToMutate]
+                valueToReplace = chromosome1[geneToCross+characteristicToMutate]
+                for i in range(0,5):
+                    if chromosome1[i*5+characteristicToMutate] == valueToAdd:
+                        chromosome1[i*5+characteristicToMutate] = valueToReplace
+                        break
+                chromosome1[geneToCross+characteristicToMutate] = valueToAdd
         
         return chromosome1
 
