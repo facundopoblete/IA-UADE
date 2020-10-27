@@ -286,7 +286,7 @@ class Riddle:
         print("Inicio del proceso iterativo")
         indi = self.iterar()
 
-        print("\n *** \nFin del proceso, mejor resultado \n - Individuo", indi.chromosome, "\n")
+        print("\n****\nFin del proceso, mejor resultado \n - Individuo", indi.chromosome, "\n")
         print("Parámetros \n-->",
                 "POPULATION_LEN:", POPULATION_LEN,
                 "PARENT_COUNT:", PARENT_COUNT ,
@@ -295,7 +295,7 @@ class Riddle:
                 "MUTATION_RATE:", MUTATION_RATE,
                 "INDIVIDUAL_CROSSOVER_RATE:",INDIVIDUAL_CROSSOVER_RATE,
                 "GENE_CROSSOVER_RATE:", GENE_CROSSOVER_RATE)
-        print("\n\n Solución\n", indi.decode())
+        print("\nSolución\n", indi.decode())
         
     def printStep(self, counter):
         print("")
@@ -417,4 +417,4 @@ rid.solve(n_population = POPULATION_LEN)
 end = time.time()
 hours, rem = divmod(end-start, 3600)
 minutes, seconds = divmod(rem, 60)
-print("Tiempo transcurrido {:0>2}:{:0>2}:{:05.2f}".format(int(hours),int(minutes),seconds))
+print("\nTiempo transcurrido {:0>2}:{:0>2}:{:05.2f}".format(int(hours),int(minutes),seconds))
