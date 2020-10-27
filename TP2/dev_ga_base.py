@@ -67,9 +67,8 @@ class Phenotype:
                  database[self.chromosome[i*5+3]],
                  editor[self.chromosome[i*5+4]]] for i in range(5)]
 
+    ''' muta un fenotipo, optimizado'''
     def mutate(self):
-        ''' muta un fenotipo, optimizado'''
-        
         random_feature = random.randint(0,4)
     
         random_1 = random.randint(0, 4)
@@ -84,9 +83,8 @@ class Phenotype:
     
         self.fitness_function()
        
+    ''' calcula el valor de fitness del cromosoma segun el problema en particular '''
     def fitness_function(self):
-        ''' calcula el valor de fitness del cromosoma segun el problema en particular '''
-
         self.score = 0
         self.fails = []
 
@@ -101,6 +99,7 @@ class Phenotype:
             for j in range(0, 5):
                 matrix[i][j] = chromosome_decode[j][i]
 
+        # por cada valor repetido resta puntos
         for i in range(0, 5):
             for j in range(0, 5):
                 if matrix[i].count(matrix[i][j]) >= 2 :
@@ -319,6 +318,7 @@ class Riddle:
 
             self.printStep(counter)
 
+            # valida si encontro solucion
             if(self.population[0].score >= 14):
                 break_condition = True
                 return self.population[0].score, self.population[0]
@@ -326,6 +326,7 @@ class Riddle:
             parents = self.population[0:PARENTS_LEN]
             random.shuffle(parents)
 
+            # cross over & mutacion
             next_population = self.cross_over(parents)
             
             # nueva poblacion
@@ -340,6 +341,9 @@ class Riddle:
 
         return self.population[0].approves, self.population[0]
 
+    '''
+    operacion: itera sobre los parents de forma random y los combina para generar nueva poblacion
+    '''
     def cross_over(self, parents):
         next_population = []
         
@@ -367,7 +371,6 @@ class Riddle:
     '''
     operacion: generar individuos y agregarlos a la poblacion
     '''
-
     def generate(self, i):
         for _ in range(0, i):
             newbie = Phenotype()
@@ -375,6 +378,9 @@ class Riddle:
             newbie.fitness_function()
             self.population.append(newbie)
     
+    '''
+    operacion: genera chromosome con valores no repetidos de forma random
+    '''
     def createRandomChromosome(self):
         colors =      ['001','010','011','100','101']
         prefession =  ['001','010','011','100','101']
@@ -410,7 +416,6 @@ class Riddle:
     '''
     operacion: mutación. Cambiar la configuración fenotipica de un individuo
     '''
-
     def mutate(self, crossed):
         if (random.random() >= 0.60):
             crossed.mutate()
@@ -420,16 +425,29 @@ class Riddle:
     '''
     operacion: cruazamiento. Intercambio de razos fenotipicos entre individuos
     '''
-
     def crossOver(self, progenitor_1, progenitor_2):
         child_1 = Phenotype()
         child_2 = Phenotype()
         
-        child_1.chromosome = progenitor_1.chromosome.copy()
-        child_2.chromosome = progenitor_2.chromosome.copy()
+        if (random.random() >= 0.8):    
+            child_1.chromosome = progenitor_1.chromosome.copy()
+            child_2.chromosome = progenitor_2.chromosome.copy()
+            child_1.fitness_function()
+            child_2.fitness_function()
+            return [child_1, child_2]
+
+        chromosome_length = 25
+
+        crossover_point = random.randint(1,chromosome_length-1)
+
+        child_1.chromosome = np.hstack((progenitor_1.chromosome[0:crossover_point],
+                            progenitor_2.chromosome[crossover_point:]))
+
+        child_2.chromosome = np.hstack((progenitor_2.chromosome[0:crossover_point],
+                            progenitor_1.chromosome[crossover_point:]))
+
         child_1.fitness_function()
         child_2.fitness_function()
-        
         return child_1, child_2
 
 random.seed(time.time_ns())
