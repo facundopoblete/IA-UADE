@@ -33,6 +33,9 @@ import random
 import time
 import numpy as np
 from datetime import datetime
+import multiprocessing as mp
+from multiprocessing import Process, Manager
+
 
 colors =      {'001' : 'red',          '010' : 'blue',          '011' : 'green',    '100' : 'white',    '101' : 'yellow'}
 prefession =  {'001' : 'Mathematician','010' : 'Hacker',        '011' : 'Engineer', '100' : 'Analyst',  '101' : 'Developer'}
@@ -48,7 +51,7 @@ EDITOR_INDEX = 4
 
 POPULATION_LEN = 20000
 
-PARENTS_LEN = 1500 #round(POPULATION_LEN * 0.003)
+PARENTS_LEN = 1500
 MAX_ITERATIONS = 20000
 
 class Phenotype:
@@ -67,29 +70,20 @@ class Phenotype:
     def mutate(self):
         ''' muta un fenotipo, optimizado'''
         
-        random_counts = random.randint(0,10)
+        random_feature = random.randint(0,4)
+    
+        random_1 = random.randint(0, 4)
+        random_2 = random.randint(0, 4)
         
-        for i in range(0, random_counts):
-            random_1 = random.randint(0, 24)
-            random_2 = random.randint(0, 24)
+        while random_1 == random_2:
+            random_2 = random.randint(0, 4)
             
-            while random_1 == random_2:
-                random_2 = random.randint(0, 24)
-                
-            chromosome_aux = self.chromosome[random_1]
-            self.chromosome[random_1] = self.chromosome[random_2]
-            self.chromosome[random_2] = chromosome_aux
-            
-            self.fitness_function()
-        # count = random.randint(1, 5)
-        # random_index = random.sample(range(25), count)
-        
-        # for i in random_index:
-        #     randomValue = random.randint(1, 5)
-        #     self.chromosome[i] = format(randomValue, '03b')
-        
-        # self.fitness_function()
-
+        chromosome_aux = self.chromosome[random_1*5+random_feature]
+        self.chromosome[random_1*5+random_feature] = self.chromosome[random_2*5+random_feature]
+        self.chromosome[random_2*5+random_feature] = chromosome_aux
+    
+        self.fitness_function()
+       
     def fitness_function(self):
         ''' calcula el valor de fitness del cromosoma segun el problema en particular '''
 
@@ -109,9 +103,9 @@ class Phenotype:
 
         for i in range(0, 5):
             for j in range(0, 5):
-                if matrix[i].count(matrix[i][j]) > 1:
-                    self.score += punish_score
-
+                if matrix[i].count(matrix[i][j]) >= 2 :
+                    self.score -= 2
+                    
         # 2. El Matematico vive en la casa roja.
         try:
             i = matrix[PROFESSION_INDEX].index('Mathematician')
@@ -297,8 +291,7 @@ class Riddle:
         print("Inicio del proceso iterativo")
         fit, indi = self.iterar()
 
-        print(
-            f"Fin del proceso, mejor resultado \n - Fitness: {fit} \n - Individuo {indi.chromosome} \n - Individuo {indi.decode()}")
+        print(f"Fin del proceso, mejor resultado \n - Fitness: {fit} \n - Individuo {indi.chromosome} \n - Individuo {indi.decode()}")
 
     def printStep(self, counter):
         print("")
@@ -306,9 +299,9 @@ class Riddle:
         print("Paso ", counter)
 
         # DEBUG
-        print(id(self.population[0]))
-        print("Puntaje: {}", self.population[0].score)
-        print("Fallo: {}", self.population[0].fails)
+        # print(id(self.population[0]))
+        print("Puntaje:", self.population[0].score)
+        print("Fallo:", self.population[0].fails)
         for i in range(0, 5):
             print('Mejor: ', self.population[0].decode()[i])
 
@@ -317,6 +310,8 @@ class Riddle:
         counter = 0
         break_condition = False
 
+        pool = mp.Pool(mp.cpu_count())
+        
         while not(break_condition):
 
             # seleccion
@@ -327,30 +322,19 @@ class Riddle:
             if(self.population[0].score >= 14):
                 break_condition = True
                 return self.population[0].score, self.population[0]
-
-            # crossover
-            next_population = []
-
+            
             parents = self.population[0:PARENTS_LEN]
             random.shuffle(parents)
-            while(len(next_population) < POPULATION_LEN):
-                ran_parent1 = random.randint(0, len(parents)-1)
-                ran_parent2 = random.randint(0, len(parents)-1)
+            
+            child_lists = pool.starmap(self.cross_over, [([parents]) for i in range(mp.cpu_count())])
 
-                while(ran_parent1 == ran_parent2):
-                    ran_parent2 = random.randint(0, len(parents)-1)
-
-                parent_1 = parents[ran_parent1]
-                parent_2 = parents[ran_parent2]
-
-                child1, child2 = self.crossOver(parent_1, parent_2)
-                
-                next_population.append(child1)
-                next_population.append(child2)
-
-            for i in range(0, POPULATION_LEN):
-                self.mutate(next_population[i])
-                
+            next_population = []
+            for childs in child_lists:
+                for child in childs:
+                    self.mutate(child)
+                    next_population.append(child)
+                    
+            # next_population = self.cross_over(parents)
             # nueva poblacion
             self.population = next_population
 
@@ -363,6 +347,31 @@ class Riddle:
 
         return self.population[0].approves, self.population[0]
 
+    def cross_over(self, parents):
+        next_population = []
+        
+        while(len(next_population) < POPULATION_LEN/mp.cpu_count()):
+        # while(len(next_population) < POPULATION_LEN):
+                ran_parent1 = random.randint(0, len(parents)-1)
+                ran_parent2 = random.randint(0, len(parents)-1)
+
+                while(ran_parent1 == ran_parent2):
+                    ran_parent2 = random.randint(0, len(parents)-1)
+
+                parent_1 = parents[ran_parent1]
+                parent_2 = parents[ran_parent2]
+                
+                child1, child2 = self.crossOver(parent_1, parent_2)
+                
+                # self.mutate(child1)
+                # self.mutate(child2)
+                child2.fitness_function()
+                child1.fitness_function()
+                next_population.append(child1)
+                next_population.append(child2)
+                
+        return next_population
+                
     '''
     operacion: generar individuos y agregarlos a la poblacion
     '''
@@ -374,83 +383,73 @@ class Riddle:
             newbie.fitness_function()
             self.population.append(newbie)
     
-    # def createRandomChromosome(self):
-    #     chromosome = []
-    #     for _ in range(0, 25):
-    #         randomValue = random.randint(1, 5)
-    #         chromosome.append(format(randomValue, '03b'))
-
-    #     return chromosome
-    
     def createRandomChromosome(self):
-        h = 5
-        geneMatrix = [[] for y in range(h)]
-
-        chromosome = []
-        for i in range(0,5):
-            for j in range(0,5):
-                randomValue = random.randint(1,5)
-
-                while geneMatrix[i].count(randomValue) > 0:
-                    randomValue = random.randint(1,5)
-                
-                geneMatrix[i].append(format(randomValue, '03b'))
-
-        for i in range(0,5):
-            for j in range(0,5):
-                chromosome.append(geneMatrix[j][i])
+        colors =      ['001','010','011','100','101']
+        prefession =  ['001','010','011','100','101']
+        languaje =    ['001','010','011','100','101']
+        database =    ['001','010','011','100','101']
+        editor =      ['001','010','011','100','101']
         
-        return chromosome
+        newbie = Phenotype()
+        
+        for _ in range(0, 5):
+                random_c = random.randint(0, len(colors)-1)
+                newbie.chromosome.append(colors[random_c])
+                del colors[random_c]
+                
+                random_p = random.randint(0, len(prefession)-1)
+                newbie.chromosome.append(prefession[random_p])
+                del prefession[random_p]
+                
+                random_c = random.randint(0, len(languaje)-1)
+                newbie.chromosome.append(languaje[random_c])
+                del languaje[random_c]
+                
+                random_c = random.randint(0, len(database)-1)
+                newbie.chromosome.append(database[random_c])
+                del database[random_c]
+                
+                random_c = random.randint(0, len(editor)-1)
+                newbie.chromosome.append(editor[random_c])
+                del editor[random_c]
+        
+        return newbie.chromosome
     
     '''
     operacion: mutación. Cambiar la configuración fenotipica de un individuo
     '''
 
     def mutate(self, crossed):
-        if (random.random() >= 0.42):
-            crossed.mutate()
-            crossed.fitness_function()
+        # if (random.random() >= 0.60):
+        crossed.mutate()
+        crossed.fitness_function()
 
     '''
     operacion: cruazamiento. Intercambio de razos fenotipicos entre individuos
     '''
 
     def crossOver(self, progenitor_1, progenitor_2):
-        
-        if (random.random() >= 0.8):
-            return [progenitor_1, progenitor_2]
-        
-        A = progenitor_1.chromosome.copy()
-        B = progenitor_2.chromosome.copy()
-        
         child_1 = Phenotype()
         child_2 = Phenotype()
         
-        P = np.random.rand(25)
+        child_1.chromosome = progenitor_1.chromosome.copy()
+        child_2.chromosome = progenitor_2.chromosome.copy()
+        child_1.fitness_function()
+        child_2.fitness_function()
         
-        for i in range(len(P)):
-            if P[i] < 0.5:
-                temp = A[i]
-                A[i] = B[i]
-                B[i] = temp
+        return child_1, child_2
+        # if (random.random() > 0.8):
+        #     return progenitor_1, progenitor_2
         
-        child_1.chromosome = A
-        child_2.chromosome = B
-        
-        # # Get length of chromosome
-        # chromosome_length = 25
-        
-        # # Pick crossover point, avoding ends of chromsome
-        # crossover_point = random.randint(1,chromosome_length-1)
-        
-        # # Create children. np.hstack joins two arrays
-        # child_1.chromosome = np.hstack((progenitor_1.chromosome[0:crossover_point],
-        #                     progenitor_2.chromosome[crossover_point:]))
-        
-        # child_2.chromosome = np.hstack((progenitor_2.chromosome[0:crossover_point],
-        #                     progenitor_1.chromosome[crossover_point:]))
-        
-        # Return children
+        for i in range(0, 5):
+            for j in range(0, 5):
+                if (random.random() > 0.5):
+                    child_1.chromosome.append(progenitor_1.chromosome[i*5+j])
+                    child_2.chromosome.append(progenitor_2.chromosome[i*5+j])
+                else:
+                    child_2.chromosome.append(progenitor_1.chromosome[i*5+j])
+                    child_1.chromosome.append(progenitor_2.chromosome[i*5+j])
+                
         child_1.fitness_function()
         child_2.fitness_function()
         return child_1, child_2
@@ -464,4 +463,4 @@ rid.solve(n_population=POPULATION_LEN)
 end = time.time()
 hours, rem = divmod(end-start, 3600)
 minutes, seconds = divmod(rem, 60)
-print("Tiempo transcurrido {:0>2}:{:0>2}:{:05.2f}".format(int(hours),int(minutes),seconds))
+print("Tiempo transcurrido {:0>2}:{:0>2}:{:05.2f}".format(int(hours),int(minutes),seconds))
