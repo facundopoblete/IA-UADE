@@ -47,10 +47,11 @@ DATABASE_INDEX = 3
 EDITOR_INDEX = 4
 
 #Parameters
-PARENT_COUNT = 2800
-POPULATION_LEN = 20000
-MAX_GENE_MUTATION = 20
-MUTATION_RATE = 0.38
+POPULATION_LEN = 20000      #Limite de población
+PARENT_COUNT = 2800         #Número de individuos (mejores) usados para generar la próxima generación
+PARENT_TO_NEXT_GEN = 1000    #Número de individuos (mejores) que se transfieren a la siguiente generación
+MAX_GENE_MUTATION = 25      #Cantidad máxima de mutaciones en un individuo
+MUTATION_RATE = 0.38         #Probabilidad de que un gen mute
 
 class Phenotype:
 
@@ -87,24 +88,23 @@ class Phenotype:
                  database[self.chromosome[i*5+3]],
                  editor[self.chromosome[i*5+4]]] for i in range(5)]
 
-    def mutate(self):
+    def mutate(self, local_random):
         ''' muta un fenotipo haciendo swap'''
         ''' se puede hacer esto porque cambié la función de inicialización de la población para que no contenga repetidos'''
-        
-        chromosome_change = 0
 
+        chromosome_change = 0
         for i in range(0, MAX_GENE_MUTATION):
             if random.random() < MUTATION_RATE:
                 chromosome_change += 1
         
         while chromosome_change > 0:
             
-            col = random.randint(0, 4) #Tipo de característica
-            row1 = random.randint(0, 4) #Valor de la caracteristica 1
-            row2 = random.randint(0, 4) #Valor de la caracteristica 2
+            col = local_random.randint(0, 4) #Tipo de característica
+            row1 = local_random.randint(0, 4) #Valor de la caracteristica 1
+            row2 = local_random.randint(0, 4) #Valor de la caracteristica 2
 
             while row1 == row2:
-                row2 = random.randint(0, 4)
+                row2 = local_random.randint(0, 4)
         
             auxSwapValue = self.chromosome[row1*5+col]
             self.chromosome[row1*5+col] = self.chromosome[row2*5+col]
@@ -322,9 +322,9 @@ class Riddle:
         print("")
         print("###")
         print("Paso ", counter)
-        half = int(len(self.population)/2)
-        average = sum(map(lambda x: x.score, self.population[half:]))/half
-        print("Promedio ", average)
+        # half = int(len(self.population)/2)
+        # average = sum(map(lambda x: x.score, self.population[half:]))/half
+        # print("Promedio ", average)
         print("Mejor puntaje ", self.population[len(self.population)-1].score)
         print("Mejor individio ", self.population[len(self.population)-1].decode())
         print("Mejor individio Fails ", self.population[len(self.population)-1].fails)
@@ -353,6 +353,9 @@ class Riddle:
 
         pool = mp.Pool(mp.cpu_count())
 
+        batch_count = mp.cpu_count()
+        batch_size = int(POPULATION_LEN/batch_count)
+
         while not(break_condition):
             
             # seleccion
@@ -366,9 +369,9 @@ class Riddle:
         
             # crossover
             parents = self.population[len(self.population) - PARENT_COUNT:]
-            next_population = self.population[len(self.population) - int(PARENT_COUNT/2):]  
-
-            child_lists = pool.starmap(self.crossover_parallel, [([parents]) for i in range(int(POPULATION_LEN/(PARENT_COUNT*2)))])
+            next_population = self.population[len(self.population) - PARENT_TO_NEXT_GEN:]
+            
+            child_lists = pool.starmap(self.crossover_parallel_batch, [(parents, batch_size) for i in range(batch_count)])
 
             for childs in child_lists:
                 for child in childs:
@@ -387,15 +390,27 @@ class Riddle:
         pool.close()
         return self.population[0].approves, self.population[0]
 
-    def crossover_parallel(self, parents):
-        next_population = []
+    def crossover_parallel_batch(self, parents, batch_size):
+        next_population_batch = []
 
-        for progenitor in parents:
-            child1, child2 = self.crossOver(progenitor)
-            next_population.append(child1)
-            next_population.append(child2)
+        local_random = random.Random()
+        local_random.seed(time.time_ns())
+
+        while len(next_population_batch) < batch_size:
+            if (len(parents) + len(next_population_batch)) > batch_size:
+                for progenitor in parents:
+                    child1, child2 = self.crossOver(progenitor, local_random)
+                    next_population_batch.append(child1)
+                    next_population_batch.append(child2)
+                    if len(next_population_batch) >= batch_size:
+                        break
+            else:
+                for progenitor in parents:
+                    child1, child2 = self.crossOver(progenitor, local_random)
+                    next_population_batch.append(child1)
+                    next_population_batch.append(child2)
         
-        return next_population
+        return next_population_batch
 
     '''
     operacion: generar individuos y agregarlos a la poblacion
@@ -406,15 +421,15 @@ class Riddle:
             self.population.append(newbie)
     
     
-    def crossOver(self, progenitor):
+    def crossOver(self, progenitor, random):
         child1 = Phenotype()
         child1.chromosome = progenitor.chromosome.copy()
         
         child2 = Phenotype()
         child2.chromosome = progenitor.chromosome.copy()
 
-        child1.mutate()
-        child2.mutate()
+        child1.mutate(random)
+        child2.mutate(random)
         child1.fitness_function()
         child2.fitness_function()
 
