@@ -47,7 +47,7 @@ EDITOR_INDEX = 4
 
 POPULATION_LEN = 20000
 
-PARENTS_LEN = round(POPULATION_LEN * 0.1 / 100)
+PARENTS_LEN = 20
 MAX_ITERATIONS = 20000
 
 class Phenotype:
@@ -59,10 +59,9 @@ class Phenotype:
 
     def createRandomChromosome(self):
         chromosome = []
-        for i in range(0,5):
-            for j in range(0,5):
-                randomValue = random.randint(1,5)
-                chromosome.append(format(randomValue, '03b'))
+        for i in range(0, 25):
+            randomValue = random.randint(1,5)
+            chromosome.append(format(randomValue, '03b'))
     
         return chromosome
     
@@ -334,7 +333,7 @@ class Riddle:
             # crossover
             next_population = []
             
-            parents = self.population[len(self.population)-PARENTS_LEN:]
+            parents = self.population[0:PARENTS_LEN:]
             random.shuffle(parents)
             self.population.clear()
             
