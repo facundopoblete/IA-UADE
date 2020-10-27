@@ -52,6 +52,7 @@ PARENT_COUNT = 2800         #Número de individuos (mejores) usados para generar
 PARENT_TO_NEXT_GEN = 1400    #Número de individuos (mejores) que se transfieren a la siguiente generación
 MAX_GENE_MUTATION = 20      #Cantidad máxima de mutaciones en un individuo
 MUTATION_RATE = 0.38         #Probabilidad de que un gen mute
+CROSSOVER_RATE = 0.2         #Probabilidad de que un gen tenga 2 parents
 
 class Phenotype:
 
@@ -116,15 +117,12 @@ class Phenotype:
         ''' calcula el valor de fitness del cromosoma segun el problema en particular '''
 
         self.score = 0
-        self.approves = 0
 
         ok_score = 1
         fail_score = -1
         punish_score = -1
         
-        matrix = [[0 for x in range(5)] for x in range(5)] 
-        
-        self.fails = []
+        matrix = [[0 for x in range(5)] for x in range(5)]
         
         for i in range(0, 5):
             for j in range(0, 5):
@@ -137,10 +135,8 @@ class Phenotype:
                 self.score += ok_score
             else:
                 self.score += fail_score
-                self.fails.append(2)
         except:
             self.score += punish_score
-            self.fails.append(2)
         
         # 3. El hacker programa en Python
         try:
@@ -149,10 +145,8 @@ class Phenotype:
                 self.score += ok_score
             else:
                 self.score += fail_score
-                self.fails.append(3)
         except:
             self.score += punish_score
-            self.fails.append(3)
         
         # 4. El Brackets es utilizado en la casa verde.
         try:
@@ -161,10 +155,8 @@ class Phenotype:
                 self.score += ok_score
             else:
                 self.score += fail_score
-                self.fails.append(4)
         except:
             self.score += punish_score
-            self.fails.append(4)
         
         # 5. El analista usa Atom.
         try:
@@ -173,10 +165,8 @@ class Phenotype:
                 self.score += ok_score
             else:
                 self.score += fail_score
-                self.fails.append(5)
         except:
             self.score += punish_score
-            self.fails.append(5)
         
         # 6. La casa verde esta a la derecha de la casa blanca.
         try:
@@ -185,10 +175,8 @@ class Phenotype:
                 self.score += ok_score
             else:
                 self.score += fail_score
-                self.fails.append(6)
         except:
             self.score += punish_score
-            self.fails.append(6)
         
         # 7. La persona que usa Redis programa en Java
         try:
@@ -197,10 +185,8 @@ class Phenotype:
                 self.score += ok_score
             else:
                 self.score += fail_score
-                self.fails.append(7)
         except:
             self.score += punish_score
-            self.fails.append(7)
 
         # 8. Cassandra es utilizado en la casa amarilla
         try:
@@ -209,10 +195,8 @@ class Phenotype:
                 self.score += ok_score
             else:
                 self.score += fail_score
-                self.fails.append(8)
         except:
             self.score += punish_score
-            self.fails.append(8)
         
         # 9. Notepad++ es usado en la casa del medio.
         try:
@@ -221,10 +205,8 @@ class Phenotype:
                 self.score += ok_score
             else:
                 self.score += fail_score
-                self.fails.append(9)
         except:
             self.score += punish_score
-            self.fails.append(9)
 
         # 10. El Desarrollador vive en la primer casa.
         try:
@@ -233,10 +215,8 @@ class Phenotype:
                 self.score += ok_score
             else:
                 self.score += fail_score
-                self.fails.append(10)
         except:
             self.score += punish_score
-            self.fails.append(10)
 
         # 11. La persona que usa HBase vive al lado de la que programa en JavaScript.
         try:
@@ -245,10 +225,8 @@ class Phenotype:
                 self.score += ok_score
             else:
                 self.score += fail_score
-                self.fails.append(11)
         except:
             self.score += fail_score
-            self.fails.append(11)
 
         # 12. La persona que usa Cassandra es vecina de la que programa en C#.
         try:
@@ -257,10 +235,8 @@ class Phenotype:
                 self.score += ok_score
             else:
                 self.score += fail_score
-                self.fails.append(12)
         except:
             self.score += fail_score
-            self.fails.append(12)
 
         # 13. La persona que usa Neo4J usa Sublime Text.
         try:
@@ -269,10 +245,8 @@ class Phenotype:
                 self.score += ok_score
             else:
                 self.score += fail_score
-                self.fails.append(13)
         except:
             self.score += punish_score
-            self.fails.append(13)
         
         # 14. El Ingeniero usa MongoDB.
         try:
@@ -281,10 +255,8 @@ class Phenotype:
                 self.score += ok_score
             else:
                 self.score += fail_score
-                self.fails.append(14)
         except:
             self.score += punish_score
-            self.fails.append(14)
 
         # 15. EL desarrollador vive en la casa azul.
         try:
@@ -293,10 +265,8 @@ class Phenotype:
                 self.score += ok_score
             else:
                 self.score += fail_score
-                self.fails.append(15)
         except:
             self.score += punish_score
-            self.fails.append(15)
         
 class Riddle:
 
@@ -313,9 +283,9 @@ class Riddle:
         print(f"Poblacion creada con {len(self.population)} individuos")
 
         print("Inicio del proceso iterativo")
-        fit, indi = self.iterar()
+        indi = self.iterar()
 
-        print(f"Fin del proceso, mejor resultado \n - Fitness: {fit} \n - Individuo {indi.chromosome} \n - Individuo {indi.decode()}")
+        print(f"Fin del proceso, mejor resultado \n - Individuo {indi.chromosome} \n - Individuo {indi.decode()}")
         print("Parámetros. PARENT_COUNT:", PARENT_COUNT , "POPULATION_LEN ", POPULATION_LEN, "MAX_GENE_MUTATION ", MAX_GENE_MUTATION, "MUTATION_RATE ", MUTATION_RATE)
         
     def printStep(self, counter):
@@ -326,25 +296,10 @@ class Riddle:
         average = sum(map(lambda x: x.score, self.population[half:]))/half
         print("Promedio ", average)
         print("Mejor puntaje ", self.population[len(self.population)-1].score)
-        print("Mejor individio ", self.population[len(self.population)-1].decode())
-        print("Mejor individio Fails ", self.population[len(self.population)-1].fails)
+        print("Mejor individuo ", self.population[len(self.population)-1].decode())
         print("--- ")
         print("Peor puntaje para padre", self.population[len(self.population) - PARENT_COUNT].score)
         print("Peor padre ", self.population[len(self.population) - PARENT_COUNT].decode())
-        print("Peor padre Fails ", self.population[len(self.population) - PARENT_COUNT].fails)
-        print("--- ")
-        print("Peor puntaje ", self.population[0].score)
-        print("Peor individio ", self.population[0].decode())
-        print("Peor individio Fails ", self.population[0].fails)
-
-        
-        # DEBUG
-        # print("len: {}", len(self.population))               
-        # print("score: {}", self.population[len(self.population)-1].score)
-        # print("approves: {}", self.population[len(self.population)-1].approves)
-        # print("fails: {}", self.population[len(self.population)-1].fails)
-        # for i in range(0,5):
-        #     print('BEST: ', self.population[len(self.population)-1].decode()[i])
 
     def iterar(self):
 
@@ -365,7 +320,7 @@ class Riddle:
             
             if(self.population[len(self.population)-1].score >= 14):
                 break_condition = True
-                return self.population[len(self.population)-1].approves, self.population[len(self.population)-1]
+                return self.population[len(self.population)-1]
         
             # crossover
             parents = self.population[len(self.population) - PARENT_COUNT:]
@@ -390,15 +345,18 @@ class Riddle:
             counter += 1
         
         pool.close()
-        return self.population[0].approves, self.population[0]
+        return self.population[0]
 
     def crossover_parallel_batch(self, parents, batch_size):
         next_population_batch = []
 
+        parent_count = len(parents)
+
         while len(next_population_batch) < batch_size:
-            if (len(parents) + len(next_population_batch)) > batch_size:
+            if (len(next_population_batch) + parent_count) > batch_size:
                 for progenitor in parents:
-                    next_population_batch.append(self.crossOver(progenitor))
+                    otherProgenitor = parents[random.randint(0, parent_count - 1)]
+                    next_population_batch.append(self.crossOver(progenitor, otherProgenitor))
                     if len(next_population_batch) >= batch_size:
                         break
             else:
@@ -416,16 +374,31 @@ class Riddle:
             self.population.append(newbie)
     
     
-    def crossOver(self, progenitor):
+    def crossOver(self, progenitor1, progenitor2):
         child = Phenotype()
-        child.chromosome = progenitor.chromosome.copy()
+        child.chromosome = progenitor1.chromosome.copy()
+
+        if random.random() < CROSSOVER_RATE:
+            child.chromosome = self._doCrossOver(child.chromosome, progenitor2.chromosome)
 
         child.mutate()
         child.fitness_function()
 
         return child
 
+    def _doCrossOver(self, chromosome1, chromosome2):
+        geneToCross = random.randint(0, 4)
 
+        for characteristicToMutate in range(0, 5):
+            valueToAdd = chromosome2[geneToCross+characteristicToMutate]
+            valueToReplace = chromosome1[geneToCross+characteristicToMutate]
+            for i in range(0,5):
+                if chromosome1[i*5+characteristicToMutate] == valueToAdd:
+                    chromosome1[i*5+characteristicToMutate] = valueToReplace
+                    break
+            chromosome1[geneToCross+characteristicToMutate] = valueToAdd
+        
+        return chromosome1
 
 random.seed(time.time_ns())
 start = time.time()
