@@ -373,8 +373,8 @@ class Riddle:
         child = Phenotype()
         child.chromosome = progenitor1.chromosome.copy()
 
-        # if random.random() < INDIVIDUAL_CROSSOVER_RATE:
-        #     child.chromosome = self._doCrossOver(child.chromosome, progenitor2.chromosome)
+        if random.random() < INDIVIDUAL_CROSSOVER_RATE:
+            child.chromosome = self._doCrossOver(child.chromosome, progenitor2.chromosome)
 
         if random.random() < MUTATION_RATE:
             child.mutate()
