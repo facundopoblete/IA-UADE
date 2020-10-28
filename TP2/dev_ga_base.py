@@ -34,85 +34,89 @@ import time
 from datetime import datetime
 import multiprocessing as mp
 
-colors =      ['red', 'blue', 'green', 'white', 'yellow']
-prefession =  ['Mathematician', 'Hacker', 'Engineer', 'Analyst', 'Developer']
-languaje =    ['Python', 'C#', 'Java', 'C++', 'JavaScript']
-database =    ['Cassandra', 'MongoDB', 'HBase', 'Neo4j', 'Redis']
-editor =      ['Brackets', 'Sublime Text', 'Vim', 'Atom', 'Notepad++']
-
+#Constants
 COLOR_INDEX = 0
 PROFESSION_INDEX = 1
 LANGUAJE_INDEX = 2
 DATABASE_INDEX = 3
 EDITOR_INDEX = 4
+COLORS =      ['red', 'blue', 'green', 'white', 'yellow']
+PROFESSIONS =  ['Mathematician', 'Hacker', 'Engineer', 'Analyst', 'Developer']
+LANGUAJES =    ['Python', 'C#', 'Java', 'C++', 'JavaScript']
+DATABASES =    ['Cassandra', 'MongoDB', 'HBase', 'Neo4j', 'Redis']
+EDITORS =      ['Brackets', 'Sublime Text', 'Vim', 'Atom', 'Notepad++']
+
+
+#Mutithreading config
+FIXED_BATCH_COUNT = 0                   #Numero de batches a paralelizar. 0 = No es fijo
+FIXED_BATCH_SIZE = 4500                 #Manaño de batch fijo. 0 = No es fijo
+BATCH_COUNT_PER_CPU = 0.45              #Cantidad de batches a usar teniendo en cuenta la cantidad de CPUs disponibles. Usado si FIXED_BATCH_COUNT & FIXED_BATCH_SIZE = 0
 
 #Parameters
-POPULATION_LEN = 25000                  #Limite de población
+POPULATION_LEN = 20000                  #Limite de población
 PARENT_COUNT = 2500                     #Número de individuos (mejores) usados para generar la próxima generación
 PARENT_TO_NEXT_GEN = 2000               #Número de individuos (mejores) que se transfieren a la siguiente generación
-MAX_GENE_MUTATION = 20                  #Cantidad máxima de mutaciones en un individuo
-MUTATION_RATE = 0.05                    #Probabilidad de que un gen mute
-INDIVIDUAL_CROSSOVER_RATE = 0.50        #Probabilidad de que un individuo tenga 2 parents
+MUTATION_RATE = 0.50                    #Probabilidad de que un gen mute
+INDIVIDUAL_CROSSOVER_RATE = 0.30        #Probabilidad de que un individuo tenga 2 parents
 GENE_CROSSOVER_RATE = 0.60              #Probabilidad de que se haga crossover para un gen
 
 class Phenotype:
 
-    def __init__(self):
-        # crear un individuo
+    def generate(self):
         self.chromosome = self.createRandomChromosome()
         self.fitness_function()
 
     def createRandomChromosome(self):
-        h = 5
-        geneMatrix = [[] for y in range(h)]
-
+        colors, prefession, languaje, database, editor = ([0,1,2,3,4] for _ in range(5))
+        
         chromosome = []
-        for i in range(0,5):
-            for j in range(0,5):
-                randomValue = random.randint(0,4)
-
-                while geneMatrix[i].count(randomValue) > 0:
-                    randomValue = random.randint(0,4)
-                
-                geneMatrix[i].append(randomValue)
-
-        for i in range(0,5):
-            for j in range(0,5):
-                chromosome.append(geneMatrix[j][i])
+        
+        for _ in range(0, 5):
+            random_c = random.randint(0, len(colors)-1)
+            chromosome.append(colors[random_c])
+            del colors[random_c]
+            
+            random_p = random.randint(0, len(prefession)-1)
+            chromosome.append(prefession[random_p])
+            del prefession[random_p]
+            
+            random_c = random.randint(0, len(languaje)-1)
+            chromosome.append(languaje[random_c])
+            del languaje[random_c]
+            
+            random_c = random.randint(0, len(database)-1)
+            chromosome.append(database[random_c])
+            del database[random_c]
+            
+            random_c = random.randint(0, len(editor)-1)
+            chromosome.append(editor[random_c])
+            del editor[random_c]
         
         return chromosome
     
     def decode(self):
         ''' traduce 0's y 1's (conjunto de genes: 3) en valores segun un diccionario '''
-        return [[colors[self.chromosome[i*5+0]], 
-                 prefession[self.chromosome[i*5+1]],
-                 languaje[self.chromosome[i*5+2]],
-                 database[self.chromosome[i*5+3]],
-                 editor[self.chromosome[i*5+4]]] for i in range(5)]
+        return [[COLORS[self.chromosome[i*5+0]], 
+                 PROFESSIONS[self.chromosome[i*5+1]],
+                 LANGUAJES[self.chromosome[i*5+2]],
+                 DATABASES[self.chromosome[i*5+3]],
+                 EDITORS[self.chromosome[i*5+4]]] for i in range(5)]
 
     def mutate(self):
         ''' muta un fenotipo haciendo swap'''
         ''' se puede hacer esto porque cambié la función de inicialización de la población para que no contenga repetidos'''
 
-        chromosome_change = 0
-        for i in range(0, MAX_GENE_MUTATION):
-            if random.random() < MUTATION_RATE:
-                chromosome_change += 1
-        
-        while chromosome_change > 0:
-            
-            col = random.randint(0, 4) #Tipo de característica
-            row1 = random.randint(0, 4) #Valor de la caracteristica 1
-            row2 = random.randint(0, 4) #Valor de la caracteristica 2
+        col = random.randint(0, 4) #Tipo de característica
+        row1 = random.randint(0, 4) #Valor de la caracteristica 1
+        row2 = random.randint(0, 4) #Valor de la caracteristica 2
 
-            while row1 == row2:
-                row2 = random.randint(0, 4)
-        
-            auxSwapValue = self.chromosome[row1*5+col]
-            self.chromosome[row1*5+col] = self.chromosome[row2*5+col]
-            self.chromosome[row2*5+col] = auxSwapValue
-            
-            chromosome_change -= 1
+        while row1 == row2:
+            row2 = random.randint(0, 4)
+    
+        auxSwapValue = self.chromosome[row1*5+col]
+        self.chromosome[row1*5+col] = self.chromosome[row2*5+col]
+        self.chromosome[row2*5+col] = auxSwapValue
+
         
     def fitness_function(self):
         ''' calcula el valor de fitness del cromosoma segun el problema en particular '''
@@ -278,11 +282,11 @@ class Riddle:
     '''
     proceso general
     '''
-    def solve(self, n_population):
+    def solve(self):
         
-        self.generate(n_population)
-        print(f"Poblacion creada con {len(self.population)} individuos")
-
+        print(f"Creando población con {len(self.population)} individuos")
+        self.generateInitialPopulation()
+        
         print("Inicio del proceso iterativo")
         indi = self.iterar()
 
@@ -291,7 +295,6 @@ class Riddle:
                 "POPULATION_LEN:", POPULATION_LEN,
                 "PARENT_COUNT:", PARENT_COUNT ,
                 "PARENT_TO_NEXT_GEN:", PARENT_TO_NEXT_GEN,
-                "MAX_GENE_MUTATION:", MAX_GENE_MUTATION,
                 "MUTATION_RATE:", MUTATION_RATE,
                 "INDIVIDUAL_CROSSOVER_RATE:",INDIVIDUAL_CROSSOVER_RATE,
                 "GENE_CROSSOVER_RATE:", GENE_CROSSOVER_RATE)
@@ -307,6 +310,13 @@ class Riddle:
         print("Mejor puntaje: ", self.population[len(self.population)-1].score)
         print("Peor puntaje para padre: ", self.population[len(self.population) - PARENT_COUNT].score)
 
+    def getBatchCount(self, cpuCount):
+        if FIXED_BATCH_COUNT != 0:
+            return FIXED_BATCH_COUNT
+        if FIXED_BATCH_SIZE != 0:
+            return int(POPULATION_LEN/FIXED_BATCH_SIZE)
+        return int(mp.cpu_count()*BATCH_COUNT_PER_CPU)
+
     def iterar(self):
 
         counter = 0
@@ -314,23 +324,24 @@ class Riddle:
 
         pool = mp.Pool(mp.cpu_count())
 
-        batch_count = int(mp.cpu_count()/2)
+        batch_count = self.getBatchCount(mp.cpu_count())
         batch_size = int((POPULATION_LEN - PARENT_TO_NEXT_GEN)/batch_count)
 
         while not(break_condition):
-            
             # seleccion
             self.population.sort(key=lambda x: x.score)
             
             self.printStep(counter)
-            
-            if(self.population[len(self.population)-1].score >= 14):
+
+            pop_len = len(self.population)
+
+            if(self.population[pop_len-1].score >= 14):
                 break_condition = True
-                return self.population[len(self.population)-1]
+                return self.population[pop_len-1]
         
             # crossover
-            parents = self.population[len(self.population) - PARENT_COUNT:]
-            next_population = self.population[len(self.population) - PARENT_TO_NEXT_GEN:]
+            parents = self.population[pop_len - PARENT_COUNT:]
+            next_population = self.population[pop_len - PARENT_TO_NEXT_GEN:]
             
 
             child_lists = pool.starmap(self.crossover_parallel_batch, [(parents, batch_size) for i in range(batch_count)])
@@ -342,9 +353,8 @@ class Riddle:
             self.population.clear()
             self.population = next_population
             
-            
             # condicion de corte
-            if counter > 20000:
+            if counter > 1000:
                 print("### Fin por condicion de corte ###")
                 break_condition = True
 
@@ -375,9 +385,10 @@ class Riddle:
     '''
     operacion: generar individuos y agregarlos a la poblacion
     '''
-    def generate(self, i):
-        for x in range(0,i):
+    def generateInitialPopulation(self):
+        for _ in range(POPULATION_LEN):
             newbie = Phenotype()
+            newbie.generate()
             self.population.append(newbie)
     
     
@@ -388,7 +399,9 @@ class Riddle:
         if random.random() < INDIVIDUAL_CROSSOVER_RATE:
             child.chromosome = self._doCrossOver(child.chromosome, progenitor2.chromosome)
 
-        child.mutate()
+        if random.random() < MUTATION_RATE:
+            child.mutate()
+
         child.fitness_function()
 
         return child
@@ -412,7 +425,7 @@ random.seed(time.time_ns())
 start = time.time()
 
 rid = Riddle()
-rid.solve(n_population = POPULATION_LEN)
+rid.solve()
 
 end = time.time()
 hours, rem = divmod(end-start, 3600)
