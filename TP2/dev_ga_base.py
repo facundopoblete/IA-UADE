@@ -49,7 +49,7 @@ EDITORS =      ['Brackets', 'Sublime Text', 'Vim', 'Atom', 'Notepad++']
 #Parameters
 POPULATION_LEN = 20000                  #Limite de población
 PARENT_COUNT = 2500                     #Número de individuos (mejores) usados para generar la próxima generación
-PARENT_TO_NEXT_GEN = 2000               #Número de individuos (mejores) que se transfieren a la siguiente generación
+PARENT_TO_NEXT_GEN = 1000               #Número de individuos (mejores) que se transfieren a la siguiente generación
 MUTATION_RATE = 0.50                    #Probabilidad de que un gen mute
 INDIVIDUAL_CROSSOVER_RATE = 0.30        #Probabilidad de que un individuo tenga 2 parents
 GENE_CROSSOVER_RATE = 0.60              #Probabilidad de que se haga crossover para un gen
@@ -66,25 +66,25 @@ class Phenotype:
         chromosome = []
         
         for _ in range(0, 5):
-            random_c = random.randint(0, len(colors)-1)
-            chromosome.append(colors[random_c])
-            del colors[random_c]
+            rn = random.randint(0, len(colors)-1)
+            chromosome.append(colors[rn])
+            del colors[rn]
             
-            random_p = random.randint(0, len(prefession)-1)
-            chromosome.append(prefession[random_p])
-            del prefession[random_p]
+            rn = random.randint(0, len(prefession)-1)
+            chromosome.append(prefession[rn])
+            del prefession[rn]
             
-            random_c = random.randint(0, len(languaje)-1)
-            chromosome.append(languaje[random_c])
-            del languaje[random_c]
+            rn = random.randint(0, len(languaje)-1)
+            chromosome.append(languaje[rn])
+            del languaje[rn]
             
-            random_c = random.randint(0, len(database)-1)
-            chromosome.append(database[random_c])
-            del database[random_c]
+            rn = random.randint(0, len(database)-1)
+            chromosome.append(database[rn])
+            del database[rn]
             
-            random_c = random.randint(0, len(editor)-1)
-            chromosome.append(editor[random_c])
-            del editor[random_c]
+            rn = random.randint(0, len(editor)-1)
+            chromosome.append(editor[rn])
+            del editor[rn]
         
         return chromosome
     
@@ -278,7 +278,7 @@ class Riddle:
     '''
     def solve(self):
         
-        print(f"Creando población con {len(self.population)} individuos")
+        print(f"Creando población con {POPULATION_LEN} individuos")
         self.generateInitialPopulation()
         
         print("Inicio del proceso iterativo")
