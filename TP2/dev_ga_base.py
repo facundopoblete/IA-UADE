@@ -46,12 +46,6 @@ LANGUAJES =    ['Python', 'C#', 'Java', 'C++', 'JavaScript']
 DATABASES =    ['Cassandra', 'MongoDB', 'HBase', 'Neo4j', 'Redis']
 EDITORS =      ['Brackets', 'Sublime Text', 'Vim', 'Atom', 'Notepad++']
 
-
-#Mutithreading config
-FIXED_BATCH_COUNT = 0                   #Numero de batches a paralelizar. 0 = No es fijo
-FIXED_BATCH_SIZE = 4500                 #Manaño de batch fijo. 0 = No es fijo
-BATCH_COUNT_PER_CPU = 0.45              #Cantidad de batches a usar teniendo en cuenta la cantidad de CPUs disponibles. Usado si FIXED_BATCH_COUNT & FIXED_BATCH_SIZE = 0
-
 #Parameters
 POPULATION_LEN = 20000                  #Limite de población
 PARENT_COUNT = 2500                     #Número de individuos (mejores) usados para generar la próxima generación
@@ -310,22 +304,10 @@ class Riddle:
         print("Mejor puntaje: ", self.population[len(self.population)-1].score)
         print("Peor puntaje para padre: ", self.population[len(self.population) - PARENT_COUNT].score)
 
-    def getBatchCount(self, cpuCount):
-        if FIXED_BATCH_COUNT != 0:
-            return FIXED_BATCH_COUNT
-        if FIXED_BATCH_SIZE != 0:
-            return int(POPULATION_LEN/FIXED_BATCH_SIZE)
-        return int(mp.cpu_count()*BATCH_COUNT_PER_CPU)
-
     def iterar(self):
 
         counter = 0
         break_condition = False
-
-        pool = mp.Pool(mp.cpu_count())
-
-        batch_count = self.getBatchCount(mp.cpu_count())
-        batch_size = int((POPULATION_LEN - PARENT_TO_NEXT_GEN)/batch_count)
 
         while not(break_condition):
             # seleccion
@@ -342,13 +324,9 @@ class Riddle:
             # crossover
             parents = self.population[pop_len - PARENT_COUNT:]
             next_population = self.population[pop_len - PARENT_TO_NEXT_GEN:]
-            
 
-            child_lists = pool.starmap(self.crossover_parallel_batch, [(parents, batch_size) for i in range(batch_count)])
-
-            for childs in child_lists:
-                for child in childs:
-                    next_population.append(child)
+            for child in self.crossOverPopulation(parents):
+                next_population.append(child)
 
             self.population.clear()
             self.population = next_population
@@ -359,28 +337,27 @@ class Riddle:
                 break_condition = True
 
             counter += 1
-        
-        pool.close()
         return self.population[0]
 
-    def crossover_parallel_batch(self, parents, batch_size):
-        next_population_batch = []
+    def crossOverPopulation(self, parents):
+        next_population = []
 
         parent_count = len(parents)
+        generation_target_count = POPULATION_LEN - PARENT_TO_NEXT_GEN
 
-        while len(next_population_batch) < batch_size:
-            if (len(next_population_batch) + parent_count) > batch_size:
+        while len(next_population) < generation_target_count:
+            if (len(next_population) + parent_count) > generation_target_count:
                 for progenitor in parents:
                     otherProgenitor = parents[random.randint(0, parent_count - 1)]
-                    next_population_batch.append(self.crossOver(progenitor, otherProgenitor))
-                    if len(next_population_batch) >= batch_size:
+                    next_population.append(self.crossOver(progenitor, otherProgenitor))
+                    if len(next_population) >= generation_target_count:
                         break
             else:
                 for progenitor in parents:
                     otherProgenitor = parents[random.randint(0, parent_count - 1)]
-                    next_population_batch.append(self.crossOver(progenitor, otherProgenitor))
+                    next_population.append(self.crossOver(progenitor, otherProgenitor))
         
-        return next_population_batch
+        return next_population
 
     '''
     operacion: generar individuos y agregarlos a la poblacion
@@ -396,8 +373,8 @@ class Riddle:
         child = Phenotype()
         child.chromosome = progenitor1.chromosome.copy()
 
-        if random.random() < INDIVIDUAL_CROSSOVER_RATE:
-            child.chromosome = self._doCrossOver(child.chromosome, progenitor2.chromosome)
+        # if random.random() < INDIVIDUAL_CROSSOVER_RATE:
+        #     child.chromosome = self._doCrossOver(child.chromosome, progenitor2.chromosome)
 
         if random.random() < MUTATION_RATE:
             child.mutate()
